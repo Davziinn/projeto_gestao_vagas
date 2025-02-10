@@ -9,30 +9,32 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import br.com.davi.gestaovagas.provider.JWTCompanyProvider;
+import br.com.davi.gestaovagas.provider.JWTCandidateProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class SecurityCompanyFilter extends OncePerRequestFilter{
+public class SecurityCandidateFilter extends OncePerRequestFilter{
 
     @Autowired
-    private JWTCompanyProvider jwtCompanyProvider;
+    private JWTCandidateProvider jwtCandidateProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String header = request.getHeader("Authorization");
 
-        if (request.getRequestURI().startsWith("/company2")) {
+        if (request.getRequestURI().startsWith("/candidate2")) {
             if (header != null) {
-                var token = this.jwtCompanyProvider.validatinToken(header);
+                var token = this.jwtCandidateProvider.validationToken(header);
                 if (token == null) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
+
+                request.setAttribute("candidate_id", token.getSubject());
 
                 var roles = token.getClaim("roles").asList(Object.class);
 
@@ -40,14 +42,11 @@ public class SecurityCompanyFilter extends OncePerRequestFilter{
                     .map(role -> new SimpleGrantedAuthority("ROLES_" + role.toString().toUpperCase()))
                     .toList();
 
-                request.setAttribute("company_id", token.getSubject());
-                
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(token.getSubject(), null, grants);
-                
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            }
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(token.getSubject(), null, grants);
+            
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
         }
-        
         filterChain.doFilter(request, response);
     }
     

@@ -21,7 +21,7 @@ public class CandidateEntity {
     
     @Id
     @GeneratedValue(strategy=GenerationType.UUID)
-    private UUID uuid;
+    private UUID id;
     private String name;
 
     @NotBlank

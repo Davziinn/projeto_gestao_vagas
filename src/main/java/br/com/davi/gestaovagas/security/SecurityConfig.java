@@ -15,15 +15,20 @@ public class SecurityConfig {
     @Autowired
     private SecurityCompanyFilter securityCompanyFilter;
 
+    private SecurityCandidateFilter securityCandidateFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> {
                 auth.requestMatchers("/candidate/").permitAll()
-                    .requestMatchers("/company2/").permitAll();
+                    .requestMatchers("/company2/").permitAll()
+                    .requestMatchers("/company2/auth").permitAll()
+                    .requestMatchers("/candidate2/auth").permitAll();
                 auth.anyRequest().authenticated();
             })
-            .addFilterBefore(securityCompanyFilter, BasicAuthenticationFilter.class);
+            .addFilterBefore(securityCompanyFilter, BasicAuthenticationFilter.class)
+            .addFilterBefore(securityCandidateFilter, BasicAuthenticationFilter.class);
         
             return http.build();
     }
